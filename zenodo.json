@@ -1,0 +1,34 @@
+{
+  "title": "APF Paper 1 — The Enforceability of Distinction: The Structural Skeleton of Quantum Mechanics from Finite Enforcement Capacity",
+  "description": "23 machine-verifiable theorems deriving quantum mechanics from a single axiom: finite enforcement capacity. Zero dependencies, zero free parameters. This repository contains the executable specification for Paper 1 of the Admissibility Physics Framework (APF), including the complete derivation chain from Axiom A1 through the four structural lemmas to the quantum skeleton (Hilbert spaces, Born rule, CPTP dynamics, tensor products, gauge symmetry, entropy).",
+  "creators": [
+    {
+      "name": "Brooke, Ethan",
+      "affiliation": ""
+    }
+  ],
+  "upload_type": "software",
+  "access_right": "open",
+  "license": "MIT",
+  "keywords": [
+    "quantum mechanics",
+    "quantum foundations",
+    "admissibility",
+    "enforcement capacity",
+    "derivation",
+    "Hilbert space",
+    "Born rule",
+    "gauge symmetry",
+    "single axiom",
+    "machine-verifiable",
+    "zero free parameters"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/Ethan-Brooke/APF-Paper-1-The-Enforceability-of-Distinction",
+      "relation": "isSupplementTo",
+      "scheme": "url"
+    }
+  ],
+  "version": "1.0.0"
+}

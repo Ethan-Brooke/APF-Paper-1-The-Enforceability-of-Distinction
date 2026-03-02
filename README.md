@@ -1,9 +1,13 @@
 # Admissibility Physics Framework — Paper 1
 
-**The Structural Skeleton of Quantum Mechanics from Finite Enforcement Capacity**
+**The Enforceability of Distinction: The Structural Skeleton of Quantum Mechanics from Finite Enforcement Capacity**
 
 <p align="center">
-  <a href="https://[your-username].github.io/apf-paper1/">🔬 Interactive Derivation DAG</a> ·
+  <a href="https://doi.org/10.5281/zenodo.18439200"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.18439200.svg" alt="DOI"></a>
+</p>
+
+<p align="center">
+  <a href="https://ethan-brooke.github.io/APF-Paper-1-The-Enforceability-of-Distinction/">🔬 Interactive Derivation DAG</a> ·
   <a href="#quick-start">Quick Start</a> ·
   <a href="#the-23-theorems">Theorem Index</a> ·
   <a href="#citation">Citation</a>
@@ -17,7 +21,7 @@ Physical distinctions require enforcement. Enforcement costs resources. Those re
 
 ## Interactive visualization
 
-👉 **[Launch the Derivation DAG](https://[your-username].github.io/apf-paper1/)**
+👉 **[Launch the Derivation DAG](https://ethan-brooke.github.io/APF-Paper-1-The-Enforceability-of-Distinction/)**
 
 The visualization is a complete interactive map of the 23-theorem derivation chain:
 
@@ -31,8 +35,8 @@ The visualization is served via GitHub Pages from the `docs/` directory. No buil
 ## Quick start
 
 ```bash
-git clone https://github.com/[your-username]/apf-paper1.git
-cd apf-paper1
+git clone https://github.com/Ethan-Brooke/APF-Paper-1-The-Enforceability-of-Distinction.git
+cd APF-Paper-1-The-Enforceability-of-Distinction
 python run_checks.py
 ```
 
@@ -123,7 +127,7 @@ Every theorem tagged **[P]** is proved from A1. The only input is A1 itself (**[
 ## Repository structure
 
 ```
-apf-paper1/
+APF-Paper-1-The-Enforceability-of-Distinction/
 ├── README.md             ← you are here
 ├── LICENSE               ← MIT
 ├── pyproject.toml        ← package metadata (zero dependencies)
@@ -172,16 +176,13 @@ print(r['dependencies'])
 # → ['T2', 'T_Hermitian', 'A1', 'L_Gleason_finite']
 ```
 
-### GitHub Pages setup
+### GitHub Pages
 
-The interactive visualization at `docs/index.html` is ready for GitHub Pages:
+The interactive visualization is live at:
 
-1. Go to your repo's **Settings → Pages**
-2. Under **Source**, select **Deploy from a branch**
-3. Set **Branch** to `main` and **Folder** to `/docs`
-4. Save — your visualization will be live at `https://[your-username].github.io/apf-paper1/`
+**https://ethan-brooke.github.io/APF-Paper-1-The-Enforceability-of-Distinction/**
 
-No build step. No CI. It's a single self-contained HTML file with zero dependencies.
+Served from `docs/index.html`. No build step, no CI, no dependencies.
 
 ## What this does and does not cover
 
@@ -226,11 +227,12 @@ By Paper 7, the DAG grows from 23 theorems to 312, and the framework makes 47 ze
 If you use this code in academic work, please cite Paper 1:
 
 ```bibtex
-@article{apf-paper1,
-  title   = {The Structural Skeleton of Quantum Mechanics from Finite Enforcement Capacity},
-  author  = {[Author]},
+@software{apf-paper1,
+  title   = {The Enforceability of Distinction: The Structural Skeleton of Quantum Mechanics from Finite Enforcement Capacity},
+  author  = {Ethan Brooke},
   year    = {2025},
-  note    = {Code: https://github.com/[your-username]/apf-paper1}
+  doi     = {10.5281/zenodo.18439200},
+  url     = {https://github.com/Ethan-Brooke/APF-Paper-1-The-Enforceability-of-Distinction}
 }
 ```
 
