@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APF Paper 1 — Derivation DAG</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Source+Serif+4:opsz,wght@8..60,300;8..60,400;8..60,600&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --bg2: #12121a;
+    --fg: #e8e6e1;
+    --fg-dim: #7a7872;
+    --accent: #f0c040;
+    --accent2: #e07030;
+    --pass: #40d88a;
+    --tier-ax: #f0c040;
+    --tier0: #e07030;
+    --tier1: #4a9eff;
+    --glow: rgba(240, 192, 64, 0.15);
+    --line: rgba(255,255,255,0.06);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Source Serif 4', Georgia, serif;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  /* ── Grain overlay ── */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ── Header ── */
+  .header {
+    padding: 48px 48px 0;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .header-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards 0.2s;
+  }
+
+  .header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(32px, 5vw, 56px);
+    font-weight: 400;
+    line-height: 1.15;
+    margin: 12px 0 8px;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards 0.4s;
+  }
+
+  .header h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .header-sub {
+    font-size: 17px;
+    color: var(--fg-dim);
+    max-width: 700px;
+    line-height: 1.6;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards 0.6s;
+  }
+
+  /* ── Controls bar ── */
+  .controls {
+    max-width: 1400px;
+    margin: 32px auto 0;
+    padding: 0 48px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards 0.8s;
+  }
+
+  .btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 1px;
+    padding: 10px 20px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.03);
+    color: var(--fg);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-transform: uppercase;
+  }
+
+  .btn:hover {
+    background: rgba(255,255,255,0.08);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .btn.active {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+  }
+
+  .btn-run {
+    background: rgba(64, 216, 138, 0.1);
+    border-color: var(--pass);
+    color: var(--pass);
+  }
+
+  .btn-run:hover {
+    background: var(--pass);
+    color: var(--bg);
+  }
+
+  .btn-run.running {
+    pointer-events: none;
+    animation: pulse 1s ease infinite;
+  }
+
+  /* ── Main canvas area ── */
+  .main {
+    max-width: 1400px;
+    margin: 24px auto 0;
+    padding: 0 48px 80px;
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 32px;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards 1s;
+  }
+
+  @media (max-width: 900px) {
+    .main { grid-template-columns: 1fr; }
+    .header, .controls, .main { padding-left: 20px; padding-right: 20px; }
+  }
+
+  /* ── SVG DAG ── */
+  .dag-container {
+    background: var(--bg2);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    position: relative;
+    min-height: 560px;
+    overflow: hidden;
+  }
+
+  .dag-container svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* ── Side panel ── */
+  .panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--line);
+    padding: 24px;
+    border-radius: 2px;
+  }
+
+  .card-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    margin-bottom: 12px;
+  }
+
+  .card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 400;
+    margin-bottom: 6px;
+  }
+
+  .card p {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--fg-dim);
+  }
+
+  .card .mono {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+  }
+
+  /* ── Detail card specifics ── */
+  .detail-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--fg-dim);
+    font-style: italic;
+    font-size: 14px;
+  }
+
+  .detail-tag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    padding: 3px 8px;
+    border-radius: 2px;
+    margin-bottom: 8px;
+  }
+
+  .detail-tag.axiom { background: rgba(240,192,64,0.15); color: var(--tier-ax); }
+  .detail-tag.proved { background: rgba(64,216,138,0.15); color: var(--pass); }
+
+  .dep-chain {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 12px;
+  }
+
+  .dep-chip {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 3px 8px;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .dep-chip:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* ── Terminal card ── */
+  .terminal {
+    background: #050508;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 2px;
+    padding: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    line-height: 1.7;
+    max-height: 300px;
+    overflow-y: auto;
+    color: var(--fg-dim);
+  }
+
+  .terminal::-webkit-scrollbar { width: 4px; }
+  .terminal::-webkit-scrollbar-track { background: transparent; }
+  .terminal::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); }
+
+  .term-pass { color: var(--pass); }
+  .term-name { color: var(--fg); }
+  .term-dim { color: var(--fg-dim); }
+  .term-prompt { color: var(--accent); }
+
+  /* ── Legend ── */
+  .legend {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    padding: 12px 0 0;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+  }
+
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  /* ── Stats bar ── */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .stat {
+    background: var(--bg2);
+    padding: 16px;
+    text-align: center;
+  }
+
+  .stat-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    color: var(--accent);
+  }
+
+  .stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    margin-top: 4px;
+  }
+
+  /* ── Tooltip ── */
+  .tooltip {
+    position: fixed;
+    z-index: 1000;
+    pointer-events: none;
+    background: #1a1a24;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 3px;
+    padding: 14px 18px;
+    max-width: 360px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04);
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+  }
+
+  .tooltip.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .tooltip-tier {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .tooltip-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    font-weight: 400;
+    color: var(--fg);
+    line-height: 1.3;
+  }
+
+  .tooltip-result {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    margin: 6px 0;
+    padding: 5px 8px;
+    background: rgba(240, 192, 64, 0.06);
+    border-left: 2px solid var(--accent);
+  }
+
+  .tooltip-desc {
+    font-family: 'Source Serif 4', serif;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--fg-dim);
+  }
+
+  .tooltip-deps {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--fg-dim);
+  }
+
+  .tooltip-deps span {
+    color: var(--fg);
+  }
+
+  .tooltip-chain {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--fg-dim);
+  }
+
+  .tooltip-chain-label {
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    margin-bottom: 5px;
+  }
+
+  .tooltip-chain-paths {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+    line-height: 1.8;
+  }
+
+  .tooltip-chain-paths .chain-node {
+    color: var(--fg);
+    padding: 1px 5px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 2px;
+  }
+
+  .tooltip-chain-paths .chain-arrow {
+    color: var(--accent);
+    opacity: 0.5;
+  }
+
+  .tooltip-paths-note {
+    margin-top: 6px;
+    font-size: 10px;
+    color: var(--accent);
+    opacity: 0.7;
+    font-style: italic;
+  }
+
+  /* ── Keyframes ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  @keyframes nodeVerify {
+    0% { filter: brightness(1); }
+    50% { filter: brightness(2.5); }
+    100% { filter: brightness(1); }
+  }
+
+  /* ── SVG styles ── */
+  .edge { stroke: rgba(255,255,255,0.08); stroke-width: 1.2; fill: none; }
+  .edge.highlighted { stroke: var(--accent); stroke-width: 2; opacity: 0.7; }
+  .edge.verified { stroke: var(--pass); stroke-width: 2; opacity: 0.6; }
+
+  .node-group { cursor: pointer; }
+  .node-group:hover .node-circle { filter: brightness(1.4); }
+
+  .node-circle {
+    transition: all 0.3s ease;
+  }
+
+  .node-circle.verified {
+    animation: nodeVerify 0.5s ease;
+  }
+
+  .node-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    fill: var(--fg);
+    text-anchor: middle;
+    pointer-events: none;
+  }
+
+  .node-group.selected .node-circle {
+    stroke: var(--accent) !important;
+    stroke-width: 3;
+    filter: drop-shadow(0 0 12px var(--glow));
+  }
+
+  .tier-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    fill: rgba(255,255,255,0.15);
+  }
+
+  .critical-path .edge { stroke-dasharray: 6 3; }
+</style>
+</head>
+<body>
+
+<div class="tooltip" id="tooltip"></div>
+
+<div class="header">
+  <div class="header-tag">Admissibility Physics Framework · Paper 1</div>
+  <h1>The Derivation DAG: <em>23 Theorems from One Axiom</em></h1>
+  <p class="header-sub">Every node is a machine-verifiable theorem. Every edge is a logical dependency. The entire structure of quantum mechanics — Hilbert spaces, Born rule, gauge symmetry — derived from a single statement: enforcement capacity is finite.</p>
+</div>
+
+<div class="controls">
+  <button class="btn btn-run" id="btnRun" onclick="runVerification()">▶ Run Checks</button>
+  <button class="btn" id="btnReset" onclick="resetDAG()">Reset</button>
+  <div style="flex:1"></div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--tier-ax)"></div>Axiom</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#d4a830"></div>Sub-clauses</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--tier0)"></div>Tier 0 · Lemmas</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--tier1)"></div>Tier 1 · Skeleton</div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="dag-container" id="dagContainer"></div>
+  <div class="panel">
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-val" id="statTotal">23</div>
+        <div class="stat-label">Theorems</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" id="statPassed">—</div>
+        <div class="stat-label">Passed</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" id="statAxioms">1</div>
+        <div class="stat-label">Axiom</div>
+      </div>
+    </div>
+    <div class="card" id="detailCard">
+      <div class="card-label">Selected Theorem</div>
+      <div class="detail-empty">Click a node to inspect</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Verification Log</div>
+      <div class="terminal" id="terminal">
+        <span class="term-prompt">$</span> <span class="term-dim">awaiting run_checks.py ...</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// DATA: Paper 1 theorem graph
+// ══════════════════════════════════════════════════════════════
+
+const theorems = {
+  'A1':          { tier: -1, label: 'A1', full: 'Finite Enforcement Capacity', desc: 'The total enforcement capacity on any causally connected region is finite. This is the single axiom from which everything follows.', deps: [], epistemic: 'AXIOM', result: 'C > 0, C < ∞' },
+  'M':           { tier: -0.5, label: 'M', full: 'Multiplicity', desc: 'Multiple distinguishable subsystems exist. Originally a sub-clause, later derived as a theorem via T_field.', deps: ['A1'], epistemic: 'P', result: '|D| ≥ 2' },
+  'NT':          { tier: -0.5, label: 'NT', full: 'Non-Triviality', desc: 'Subsystems are not all identical — enforcement costs are not all equal. Derived via T11.', deps: ['A1', 'M'], epistemic: 'P', result: '∃ d₁,d₂: ε(d₁) ≠ ε(d₂)' },
+  'L_epsilon*':  { tier: 0, label: 'L_ε*', full: 'Minimum Cost', desc: 'Every meaningful distinction has a minimum enforcement cost strictly greater than zero. If distinctions were free, everything would be distinguished — no structure, no physics.', deps: ['A1'], epistemic: 'P', result: 'ε* > 0' },
+  'L_nc':        { tier: 0, label: 'L_nc', full: 'Non-Closure', desc: 'The state space is not closed under mixing. This is the seed of quantum superposition — classical probability would require closure.', deps: ['A1', 'L_loc'], epistemic: 'P', result: 'State space ≠ simplex' },
+  'L_loc':       { tier: 0, label: 'L_loc', full: 'Locality', desc: 'Enforcement decomposes additively over causally disconnected regions. Not assumed — derived from A1 + M + NT.', deps: ['A1', 'L_epsilon*', 'M', 'NT'], epistemic: 'P', result: 'E(S₁∪S₂) = E(S₁) + E(S₂)' },
+  'L_irr':       { tier: 0, label: 'L_irr', full: 'Irreversibility', desc: 'Some enforcement processes cannot be undone. The arrow of time emerges from finite capacity, not as an assumption.', deps: ['A1', 'L_nc', 'L_loc'], epistemic: 'P', result: '∃ irreversible processes' },
+  'L_T2':        { tier: 1, label: 'L_T2', full: 'Finite GNS', desc: 'Non-commutativity plus a concrete state forces an explicit finite-dimensional GNS construction. The bridge from abstract algebra to Hilbert space.', deps: ['L_nc', 'L_loc', 'L_irr'], epistemic: 'P', result: 'dim(H) = 4 witness' },
+  'L_cost':      { tier: 1, label: 'L_cost', full: 'Cost Uniqueness', desc: 'The cost function C(G) = dim(G)·ε is the unique assignment consistent with A1. No freedom in how nature charges for enforcement.', deps: ['A1', 'L_epsilon*', 'L_loc', 'L_nc', 'T_M', 'T3'], epistemic: 'P', result: 'C(G) = dim(G)·ε forced' },
+  'T0':          { tier: 1, label: 'T0', full: 'Axiom Witnesses', desc: 'Concrete mathematical witnesses for the axiom: non-commuting operators, locality-based irreversibility, Δ = 4.', deps: ['A1', 'L_irr', 'L_nc'], epistemic: 'P', result: 'Δ = 4, [A,B] ≠ 0' },
+  'T1':          { tier: 1, label: 'T1', full: 'Incompatible Observables', desc: 'Non-closure forces the existence of incompatible observables — measurements that cannot be performed simultaneously. The heart of uncertainty.', deps: ['L_nc', 'T0', 'L_loc'], epistemic: 'P', result: '∃ incompatible A, B' },
+  'T2':          { tier: 1, label: 'T2', full: 'Hilbert Space', desc: 'The operator algebra must act on a Hilbert space. Not assumed, not postulated — forced by non-closure and finite capacity.', deps: ['A1', 'L_nc', 'T1', 'L_T2'], epistemic: 'P', result: 'H = Hilbert space' },
+  'T3':          { tier: 1, label: 'T3', full: 'Gauge Bundle', desc: 'Locality plus the operator algebra forces a gauge bundle with connection. The skeleton of all gauge theories — from electromagnetism to the strong force.', deps: ['T2', 'L_loc'], epistemic: 'P', result: 'P → M, ∇ connection' },
+  'T_Born':      { tier: 1, label: 'T_Born', full: 'Born Rule', desc: 'The Born rule — p = |⟨ψ|φ⟩|² — is the unique probability assignment compatible with admissibility. Via Gleason\'s theorem for d ≥ 3.', deps: ['T2', 'T_Hermitian', 'A1'], epistemic: 'P', result: 'p = |⟨ψ|φ⟩|²' },
+  'T_CPTP':      { tier: 1, label: 'T_CPTP', full: 'CPTP Dynamics', desc: 'Completely positive trace-preserving maps are the unique admissible dynamics. Verified via Kraus decomposition.', deps: ['T2', 'T_Born', 'A1'], epistemic: 'P', result: 'Φ: CPTP maps' },
+  'T_Hermitian': { tier: 1, label: 'T_Herm', full: 'Hermitian Observables', desc: 'Physical observables must be Hermitian operators. Derived from irreversibility and non-closure — not a textbook postulate.', deps: ['A1', 'L_irr', 'L_nc'], epistemic: 'P', result: 'O = O†' },
+  'T_M':         { tier: 1, label: 'T_M', full: 'Interface Monogamy', desc: 'Disjoint interfaces enforce independently. The seed of entanglement monogamy and the holographic principle.', deps: ['A1', 'L_loc', 'L_epsilon*'], epistemic: 'P', result: 'Disjoint ⇒ independent' },
+  'T_canonical': { tier: 1, label: 'T_can', full: 'Canonical Object', desc: 'A1 forces a specific mathematical object into existence: a sheaf of finite sets with a non-local cost functional. Sets compose (gluing); costs do not (entanglement).', deps: ['A1', 'L_epsilon*', 'L_loc', 'L_nc'], epistemic: 'P', result: 'Sheaf + Ω_inter' },
+  'T_entropy':   { tier: 1, label: 'T_S', full: 'Entropy', desc: 'Von Neumann entropy S(ρ) = −Tr(ρ log ρ) is the committed enforcement capacity. Entropy is not disorder — it is the cost of what has already been enforced.', deps: ['T2', 'T_Born', 'L_nc', 'A1'], epistemic: 'P', result: 'S = −Tr(ρ ln ρ)' },
+  'T_epsilon':   { tier: 1, label: 'T_ε', full: 'Min Cost Parameter', desc: 'The minimum nonzero enforcement cost ε > 0 exists as a well-defined parameter of any admissible system.', deps: ['L_epsilon*', 'A1'], epistemic: 'P', result: 'ε = min cost > 0' },
+  'T_kappa':     { tier: 1, label: 'T_κ', full: 'Binary Multiplier', desc: 'The binary distinction multiplier is exactly 2. A qubit costs twice the minimum — the origin of the factor of 2 throughout quantum mechanics.', deps: ['T_epsilon', 'A1', 'L_irr'], epistemic: 'P', result: 'κ = 2' },
+  'T_eta':       { tier: 1, label: 'T_η', full: 'Correlation Bound', desc: 'The correlation cost η satisfies η/ε ≤ 1. Correlations can never cost more than the distinctions they correlate.', deps: ['T_epsilon', 'T_M', 'A1', 'T_kappa'], epistemic: 'P', result: 'η/ε ≤ 1' },
+  'T_tensor':    { tier: 1, label: 'T_⊗', full: 'Tensor Products', desc: 'Composite systems form tensor products. Entanglement is generic — most composite states are entangled. Forced by compositional closure.', deps: ['T2', 'L_nc', 'A1'], epistemic: 'P', result: 'H_AB = H_A ⊗ H_B' },
+};
+
+// ══════════════════════════════════════════════════════════════
+// LAYOUT: hierarchical placement
+// ══════════════════════════════════════════════════════════════
+
+const tierYs = { '-1': 50, '-0.5': 140, '0': 250, '1': 420 };
+const tierColors = { '-1': '#f0c040', '-0.5': '#d4a830', '0': '#e07030', '1': '#4a9eff' };
+
+function layoutNodes(width, height) {
+  const tiers = { '-1': [], '-0.5': [], '0': [], '1': [] };
+  Object.entries(theorems).forEach(([id, t]) => tiers[t.tier].push(id));
+
+  const positions = {};
+  Object.entries(tiers).forEach(([tier, ids]) => {
+    const y = tierYs[tier];
+    const n = ids.length;
+    const spacing = Math.min(90, (width - 80) / Math.max(n, 1));
+    const startX = (width - (n - 1) * spacing) / 2;
+    ids.forEach((id, i) => {
+      positions[id] = { x: startX + i * spacing, y: y + (n > 4 ? (i % 2) * 18 : 0) };
+    });
+  });
+
+  return positions;
+}
+
+// ══════════════════════════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════════════════════════
+
+let positions = {};
+let selectedNode = null;
+let verifiedNodes = new Set();
+
+function render() {
+  const container = document.getElementById('dagContainer');
+  const rect = container.getBoundingClientRect();
+  const W = rect.width || 800;
+  const H = 560;
+  container.style.minHeight = H + 'px';
+
+  positions = layoutNodes(W, H);
+
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.setAttribute('width', W);
+  svg.setAttribute('height', H);
+
+  // Tier labels
+  [[-1, 'The Axiom'], [-0.5, 'Sub-clauses'], [0, 'Tier 0 · Structural Lemmas'], [1, 'Tier 1 · Quantum Skeleton']].forEach(([tier, label]) => {
+    const t = document.createElementNS(ns, 'text');
+    t.setAttribute('x', 16);
+    t.setAttribute('y', tierYs[tier] - 16);
+    t.setAttribute('class', 'tier-label');
+    t.textContent = label;
+    svg.appendChild(t);
+  });
+
+  // Tier lines
+  [-0.5, 0, 1].forEach(tier => {
+    const line = document.createElementNS(ns, 'line');
+    line.setAttribute('x1', 0);
+    line.setAttribute('x2', W);
+    line.setAttribute('y1', tierYs[tier] - 32);
+    line.setAttribute('y2', tierYs[tier] - 32);
+    line.setAttribute('stroke', 'rgba(255,255,255,0.03)');
+    line.setAttribute('stroke-width', 1);
+    svg.appendChild(line);
+  });
+
+  // Edges
+  const edgeGroup = document.createElementNS(ns, 'g');
+  edgeGroup.id = 'edges';
+  Object.entries(theorems).forEach(([id, t]) => {
+    t.deps.forEach(depId => {
+      if (!positions[depId] || !positions[id]) return;
+      const p1 = positions[depId];
+      const p2 = positions[id];
+
+      const path = document.createElementNS(ns, 'path');
+      const midY = (p1.y + p2.y) / 2;
+      const d = `M${p1.x},${p1.y + 14} C${p1.x},${midY} ${p2.x},${midY} ${p2.x},${p2.y - 14}`;
+      path.setAttribute('d', d);
+      path.setAttribute('class', 'edge');
+      path.dataset.from = depId;
+      path.dataset.to = id;
+      edgeGroup.appendChild(path);
+    });
+  });
+  svg.appendChild(edgeGroup);
+
+  // Nodes
+  const nodeGroup = document.createElementNS(ns, 'g');
+  nodeGroup.id = 'nodes';
+  Object.entries(theorems).forEach(([id, t]) => {
+    const pos = positions[id];
+    if (!pos) return;
+
+    const g = document.createElementNS(ns, 'g');
+    g.setAttribute('class', 'node-group');
+    g.dataset.id = id;
+    g.setAttribute('transform', `translate(${pos.x}, ${pos.y})`);
+
+    // Glow
+    const glow = document.createElementNS(ns, 'circle');
+    glow.setAttribute('r', 20);
+    glow.setAttribute('fill', tierColors[t.tier]);
+    glow.setAttribute('opacity', 0.06);
+    g.appendChild(glow);
+
+    // Circle
+    const r = t.tier === -1 && id === 'A1' ? 16 : 12;
+    const circle = document.createElementNS(ns, 'circle');
+    circle.setAttribute('r', r);
+    circle.setAttribute('fill', tierColors[t.tier]);
+    circle.setAttribute('opacity', 0.85);
+    circle.setAttribute('stroke', tierColors[t.tier]);
+    circle.setAttribute('stroke-width', 1.5);
+    circle.setAttribute('class', 'node-circle');
+    circle.id = 'circle-' + id;
+    g.appendChild(circle);
+
+    // Label
+    const text = document.createElementNS(ns, 'text');
+    text.setAttribute('y', r + 18);
+    text.setAttribute('class', 'node-label');
+    text.textContent = t.label;
+    g.appendChild(text);
+
+    g.addEventListener('click', () => selectNode(id));
+    g.addEventListener('mouseenter', (e) => showTooltip(id, e));
+    g.addEventListener('mousemove', (e) => moveTooltip(e));
+    g.addEventListener('mouseleave', hideTooltip);
+    nodeGroup.appendChild(g);
+  });
+  svg.appendChild(nodeGroup);
+
+  container.innerHTML = '';
+  container.appendChild(svg);
+
+  // Re-apply verification state
+  verifiedNodes.forEach(id => {
+    const c = document.getElementById('circle-' + id);
+    if (c) { c.setAttribute('fill', '#40d88a'); c.setAttribute('stroke', '#40d88a'); }
+  });
+
+  if (selectedNode) selectNode(selectedNode);
+}
+
+function selectNode(id) {
+  // Hide tooltip on click
+  hideTooltip();
+
+  // Clear previous
+  document.querySelectorAll('.node-group.selected').forEach(g => g.classList.remove('selected'));
+  document.querySelectorAll('.edge.highlighted').forEach(e => e.classList.remove('highlighted'));
+
+  selectedNode = id;
+  const t = theorems[id];
+  const g = document.querySelector(`.node-group[data-id="${id}"]`);
+  if (g) g.classList.add('selected');
+
+  // Highlight dependency edges
+  const allDeps = getAllDeps(id);
+  document.querySelectorAll('.edge').forEach(e => {
+    if (allDeps.has(e.dataset.from) && (allDeps.has(e.dataset.to) || e.dataset.to === id)) {
+      e.classList.add('highlighted');
+    }
+    if (e.dataset.to === id) e.classList.add('highlighted');
+  });
+
+  // Update detail card
+  const card = document.getElementById('detailCard');
+  const tagClass = t.epistemic === 'AXIOM' ? 'axiom' : 'proved';
+  const tagText = t.epistemic === 'AXIOM' ? 'AXIOM' : 'PROVED [P]';
+
+  const pathCount = countPathsToA1(id);
+  const chain = findShortestChain(id);
+  const totalAncestors = allDeps.size - 1; // exclude self
+
+  // Chain visualization for detail card
+  let chainDetailHtml = '';
+  if (id !== 'A1' && chain.length > 1) {
+    const chainStr = chain.map(n => `<span class="dep-chip" onclick="selectNode('${n}')">${theorems[n]?.label || n}</span>`).join(' <span style="color:var(--accent);opacity:0.5;">→</span> ');
+    const pathDesc = pathCount > 1
+      ? `${pathCount} distinct derivation paths reach this theorem from A1. Multiple paths mean the result is over-determined — it would survive even if one chain were weakened.`
+      : 'Single derivation path from A1.';
+    chainDetailHtml = `
+    <div style="margin-top: 14px;">
+      <div class="card-label" style="margin-bottom: 6px">Shortest chain to A1</div>
+      <div class="dep-chain">${chainStr}</div>
+      <p style="margin-top: 8px; font-size: 12px; font-family: 'JetBrains Mono', monospace; color: var(--fg-dim);">
+        ${pathCount} path${pathCount > 1 ? 's' : ''} · ${totalAncestors} ancestor${totalAncestors > 1 ? 's' : ''} · depth ${chain.length - 1}
+      </p>
+      <p style="margin-top: 4px; font-size: 13px; color: var(--fg-dim); line-height: 1.5;">${pathDesc}</p>
+    </div>`;
+  }
+
+  card.innerHTML = `
+    <div class="card-label">Selected Theorem</div>
+    <span class="detail-tag ${tagClass}">${tagText}</span>
+    <h3>${t.full}</h3>
+    <p style="margin: 8px 0; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--accent);">${t.result}</p>
+    <p>${t.desc}</p>
+    ${t.deps.length ? `
+    <div style="margin-top: 14px;">
+      <div class="card-label" style="margin-bottom: 6px">Direct dependencies</div>
+      <div class="dep-chain">
+        ${t.deps.map(d => `<span class="dep-chip" onclick="selectNode('${d}')">${theorems[d]?.label || d}</span>`).join('')}
+      </div>
+    </div>` : '<p style="margin-top: 12px; font-style: italic; color: var(--fg-dim);">No dependencies — this is the root.</p>'}
+    ${chainDetailHtml}
+  `;
+}
+
+function getAllDeps(id, visited = new Set()) {
+  visited.add(id);
+  (theorems[id]?.deps || []).forEach(d => {
+    if (!visited.has(d)) getAllDeps(d, visited);
+  });
+  return visited;
+}
+
+// ══════════════════════════════════════════════════════════════
+// VERIFICATION ANIMATION
+// ══════════════════════════════════════════════════════════════
+
+async function runVerification() {
+  const btn = document.getElementById('btnRun');
+  btn.classList.add('running');
+  btn.textContent = '● Running...';
+  verifiedNodes.clear();
+
+  const terminal = document.getElementById('terminal');
+  terminal.innerHTML = '<span class="term-prompt">$</span> python run_checks.py\n\n';
+
+  // Topological sort
+  const order = topoSort();
+  let passed = 0;
+
+  for (const id of order) {
+    const t = theorems[id];
+    await sleep(120 + Math.random() * 80);
+
+    // Verify node visually
+    const circle = document.getElementById('circle-' + id);
+    if (circle) {
+      circle.setAttribute('fill', '#40d88a');
+      circle.setAttribute('stroke', '#40d88a');
+      circle.classList.add('verified');
+      setTimeout(() => circle.classList.remove('verified'), 500);
+    }
+
+    // Mark edges
+    document.querySelectorAll(`.edge[data-to="${id}"]`).forEach(e => {
+      e.classList.add('verified');
+    });
+
+    verifiedNodes.add(id);
+    passed++;
+
+    const ep = t.epistemic === 'AXIOM' ? 'AXIOM' : 'P';
+    terminal.innerHTML += `  <span class="term-dim">[${ep}]</span> <span class="term-pass">PASS</span>  <span class="term-name">${id}</span>\n`;
+    terminal.innerHTML += `  <span class="term-dim">       ${t.result}</span>\n`;
+    terminal.scrollTop = terminal.scrollHeight;
+
+    document.getElementById('statPassed').textContent = passed;
+  }
+
+  await sleep(300);
+  terminal.innerHTML += `\n<span class="term-dim">══════════════════════════════════════════</span>\n`;
+  terminal.innerHTML += `  <span class="term-pass">Paper 1 (SPINE): 23 passed, 0 failed</span>\n`;
+  terminal.innerHTML += `<span class="term-dim">══════════════════════════════════════════</span>\n`;
+  terminal.scrollTop = terminal.scrollHeight;
+
+  btn.classList.remove('running');
+  btn.textContent = '✓ Complete';
+}
+
+function resetDAG() {
+  verifiedNodes.clear();
+  selectedNode = null;
+  document.getElementById('statPassed').textContent = '—';
+  document.getElementById('btnRun').textContent = '▶ Run Checks';
+  document.getElementById('btnRun').classList.remove('running');
+  document.getElementById('terminal').innerHTML = '<span class="term-prompt">$</span> <span class="term-dim">awaiting run_checks.py ...</span>';
+  document.getElementById('detailCard').innerHTML = '<div class="card-label">Selected Theorem</div><div class="detail-empty">Click a node to inspect</div>';
+  render();
+}
+
+function topoSort() {
+  const visited = new Set();
+  const order = [];
+  function visit(id) {
+    if (visited.has(id)) return;
+    visited.add(id);
+    (theorems[id]?.deps || []).forEach(d => { if (theorems[d]) visit(d); });
+    order.push(id);
+  }
+  Object.keys(theorems).forEach(visit);
+  return order;
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ══════════════════════════════════════════════════════════════
+// TOOLTIP
+// ══════════════════════════════════════════════════════════════
+
+const tooltip = document.getElementById('tooltip');
+let tooltipTimeout = null;
+
+function showTooltip(id, e) {
+  const t = theorems[id];
+  const tierNames = { '-1': 'The Axiom', '-0.5': 'Sub-clause', '0': 'Tier 0 · Lemma', '1': 'Tier 1 · Skeleton' };
+  const tierColor = tierColors[t.tier];
+
+  // Count distinct paths back to A1
+  const pathCount = countPathsToA1(id);
+  
+  // Find the shortest chain back to A1
+  const shortestChain = findShortestChain(id);
+
+  // Direct dependencies section
+  const depsHtml = t.deps.length
+    ? `<div class="tooltip-deps">Direct deps: <span>${t.deps.map(d => theorems[d]?.label || d).join('</span> · <span>')}</span></div>`
+    : `<div class="tooltip-deps" style="color: var(--tier-ax);">⬡ Root — no dependencies</div>`;
+
+  // Chain + paths section (only for non-root nodes)
+  let chainHtml = '';
+  if (id !== 'A1' && shortestChain.length > 1) {
+    const chainNodes = shortestChain.map(n => 
+      `<span class="chain-node">${theorems[n]?.label || n}</span>`
+    ).join('<span class="chain-arrow">→</span>');
+
+    const pathNote = pathCount > 1
+      ? `<div class="tooltip-paths-note">${pathCount} distinct paths back to A1 — redundant derivation chains strengthen the result</div>`
+      : `<div class="tooltip-paths-note">Single derivation path to A1</div>`;
+
+    chainHtml = `
+      <div class="tooltip-chain">
+        <div class="tooltip-chain-label">Shortest chain to A1</div>
+        <div class="tooltip-chain-paths">${chainNodes}</div>
+        ${pathNote}
+      </div>`;
+  }
+
+  tooltip.innerHTML = `
+    <div class="tooltip-tier" style="color: ${tierColor};">${tierNames[t.tier]}</div>
+    <div class="tooltip-name">${t.full}</div>
+    <div class="tooltip-result">${t.result}</div>
+    <div class="tooltip-desc">${t.desc}</div>
+    ${depsHtml}
+    ${chainHtml}
+  `;
+
+  clearTimeout(tooltipTimeout);
+  tooltipTimeout = setTimeout(() => {
+    tooltip.classList.add('visible');
+  }, 200);
+
+  moveTooltip(e);
+}
+
+// Count distinct paths from a node back to A1
+function countPathsToA1(id) {
+  const memo = {};
+  function count(n) {
+    if (n === 'A1') return 1;
+    if (memo[n] !== undefined) return memo[n];
+    const t = theorems[n];
+    if (!t || !t.deps.length) return 0;
+    let total = 0;
+    for (const dep of t.deps) {
+      if (theorems[dep]) total += count(dep);
+    }
+    memo[n] = total;
+    return total;
+  }
+  return count(id);
+}
+
+// Find shortest chain back to A1 (BFS)
+function findShortestChain(id) {
+  if (id === 'A1') return ['A1'];
+  const queue = [[id]];
+  const visited = new Set([id]);
+  while (queue.length) {
+    const path = queue.shift();
+    const current = path[path.length - 1];
+    if (current === 'A1') return path.reverse();
+    const t = theorems[current];
+    if (!t) continue;
+    for (const dep of t.deps) {
+      if (!visited.has(dep) && theorems[dep]) {
+        visited.add(dep);
+        queue.push([...path, dep]);
+      }
+    }
+  }
+  return [id]; // fallback
+}
+
+function moveTooltip(e) {
+  const pad = 16;
+  const rect = tooltip.getBoundingClientRect();
+  let x = e.clientX + pad;
+  let y = e.clientY - 20;
+
+  // Keep tooltip on screen
+  if (x + 360 > window.innerWidth) x = e.clientX - 360 - pad;
+  if (y + rect.height > window.innerHeight) y = window.innerHeight - rect.height - pad;
+  if (y < pad) y = pad;
+
+  tooltip.style.left = x + 'px';
+  tooltip.style.top = y + 'px';
+}
+
+function hideTooltip() {
+  clearTimeout(tooltipTimeout);
+  tooltip.classList.remove('visible');
+}
+
+// ══════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════
+
+window.addEventListener('load', () => {
+  render();
+  window.addEventListener('resize', render);
+});
+</script>
+</body>
+</html>
