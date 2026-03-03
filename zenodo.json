@@ -1,6 +1,6 @@
 {
   "title": "APF Paper 1 — The Enforceability of Distinction: The Structural Skeleton of Quantum Mechanics from Finite Enforcement Capacity",
-  "description": "23 machine-verifiable theorems deriving quantum mechanics from a single axiom: finite enforcement capacity. Zero dependencies, zero free parameters. This repository contains the executable specification for Paper 1 of the Admissibility Physics Framework (APF), including the complete derivation chain from Axiom A1 through the four structural lemmas to the quantum skeleton (Hilbert spaces, Born rule, CPTP dynamics, tensor products, gauge symmetry, entropy).",
+  "description": "<p>23 machine-verifiable theorems deriving the structural skeleton of quantum mechanics from a single axiom: finite enforcement capacity (A1). Zero external dependencies, zero free parameters, exact rational arithmetic throughout.</p>\n\n<p>This repository is the Interactive Mathematical Appendix for Paper 1 of the Admissibility Physics Framework (APF). It contains the complete derivation chain from Axiom A1 through four structural lemmas to the quantum skeleton: Hilbert spaces, the Born rule, CPTP dynamics, tensor products, gauge symmetry, and von Neumann entropy as committed capacity.</p>\n\n<h3>Key features</h3>\n<ul><li>All pre-Hilbert-space theorems (A1 through T1) use only finite sets and exact rational arithmetic — no matrices, no complex numbers, no linear algebra</li><li>Matrices first appear in T2 as the <em>minimal representation</em> of the non-commutative structure T1 proves from scalars (Frobenius' theorem forces ℂ as the ground field)</li><li>Every theorem traces to a named check function with a six-field docstring (manuscript section, dependencies, mathematical statement, verification method, physical meaning)</li><li>Total verification time: &lt;1 second</li></ul>\n\n<h3>Three verification paths</h3>\n<ol><li><strong>Zero-install Colab notebook</strong> — <a href=\"https://colab.research.google.com/github/Ethan-Brooke/APF-Paper-1-The-Enforceability-of-Distinction/blob/main/APF_Reviewer_Walkthrough.ipynb\">Open in Google Colab</a> — 25 annotated cells with inline LaTeX and executable code; all critical arithmetic visible, not hidden behind function calls</li><li><strong>Interactive derivation DAG</strong> — <a href=\"https://ethan-brooke.github.io/APF-Paper-1-The-Enforceability-of-Distinction/\">Open in browser</a> — hover for theorem summaries, click for dependencies, animated verification</li><li><strong>Local execution</strong> — clone the <a href=\"https://github.com/Ethan-Brooke/APF-Paper-1-The-Enforceability-of-Distinction\">GitHub repository</a> and run <code>python run_checks.py</code> (Python 3.8+, no pip install)</li></ol>\n\n<h3>Repository contents</h3>\n<ul><li><code>apf/core.py</code> — 23 check functions, one per theorem</li><li><code>apf/apf_utils.py</code> — exact matrix arithmetic infrastructure (post-T2 only)</li><li><code>REVIEWERS_GUIDE.md</code> — 9-section peer-review walkthrough addressing the scalar-to-matrix boundary, the Frobenius argument for ℂ, and six falsification surfaces</li><li><code>APF_Reviewer_Walkthrough.ipynb</code> — Colab notebook for referees</li><li><code>docs/index.html</code> — interactive derivation DAG</li></ul>\n\n<p>Accompanies the manuscript <em>The Enforceability of Distinction</em> submitted to <em>Foundations of Physics</em>.</p>",
   "creators": [
     {
       "name": "Brooke, Ethan",
@@ -21,7 +21,9 @@
     "gauge symmetry",
     "single axiom",
     "machine-verifiable",
-    "zero free parameters"
+    "zero free parameters",
+    "Frobenius theorem",
+    "GNS construction"
   ],
   "related_identifiers": [
     {
