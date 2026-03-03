@@ -1,74 +1,100 @@
-# Admissibility Physics Framework — Paper 1
+# The Enforceability of Distinction
 
-**The Enforceability of Distinction: The Structural Skeleton of Quantum Mechanics from Finite Enforcement Capacity**
+### Interactive Mathematical Appendix to Paper 1 of the Admissibility Physics Framework
 
 <p align="center">
   <a href="https://doi.org/10.5281/zenodo.18439200"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.18439200.svg" alt="DOI"></a>
+  <a href="https://colab.research.google.com/github/Ethan-Brooke/APF-Paper-1-The-Enforceability-of-Distinction/blob/main/APF_Reviewer_Walkthrough.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab"></a>
 </p>
 
 <p align="center">
-  <a href="https://ethan-brooke.github.io/APF-Paper-1-The-Enforceability-of-Distinction/">🔬 Interactive Derivation DAG</a> ·
-  <a href="#quick-start">Quick Start</a> ·
-  <a href="#the-23-theorems">Theorem Index</a> ·
+  <a href="https://ethan-brooke.github.io/APF-Paper-1-The-Enforceability-of-Distinction/">Interactive Derivation DAG</a> ·
+  <a href="#theorem-mapping-table">Theorem Map</a> ·
+  <a href="REVIEWERS_GUIDE.md">Reviewers' Guide</a> ·
   <a href="#citation">Citation</a>
 </p>
 
 ---
 
-## The argument in one paragraph
+## Why this codebase exists
 
-Physical distinctions require enforcement. Enforcement costs resources. Those resources are finite. From this single axiom — **finite enforcement capacity** — the mathematical structure of quantum mechanics emerges as the unique admissible physics. Hilbert spaces, the Born rule, CPTP dynamics, tensor products, gauge symmetry, and entropy are all *derived consequences*, not assumptions. This repository is the executable proof.
+Paper 1 derives the structural skeleton of quantum mechanics from a single axiom: enforcement capacity is finite and positive.  Twenty-three theorems are proved, each building on the last, from the axiom through four structural lemmas to Hilbert spaces, the Born rule, CPTP dynamics, tensor products, gauge symmetry, and entropy.
 
-## Interactive visualization
+This repository is the executable proof.
 
-👉 **[Launch the Derivation DAG](https://ethan-brooke.github.io/APF-Paper-1-The-Enforceability-of-Distinction/)**
+Because A1 is a discrete, finite-capacity bound, the natural language of proof is **exact rational arithmetic**.  Every witness in this codebase uses Python's `Fraction` type — no floating-point approximation, no rounding, no numerical error.  When the code asserts that a composition of two admissible states overflows the capacity bound, the overflow is *exact*: the rational number $19\tfrac{1}{2}$ exceeds $10$, not $10.000001 > 9.999999$.  This is the most rigorous way to verify the absence of classical overflow without artifacts.
 
-The visualization is a complete interactive map of the 23-theorem derivation chain:
+The codebase requires **Python 3.9+ and the standard library only** — no NumPy, no SciPy, no external dependencies of any kind.  This is a deliberate choice: the proofs should be inspectable and reproducible without installing anything, and they should run unchanged in twenty years.  Every matrix operation is implemented by hand in exact arithmetic.
 
-- **Explore the graph.** Every node is a theorem. Every edge is a logical dependency. Nodes are arranged by derivation tier: Axiom A1 at top, structural lemmas in the middle, the quantum skeleton at the bottom.
-- **Hover any node** to see its full name, key mathematical result, plain-English explanation, the shortest derivation chain back to A1, and the number of distinct paths connecting it to the axiom. Multiple paths mean the result is over-determined — it would survive even if one chain were weakened.
-- **Click a node** for the deep-dive panel: direct dependencies (clickable), chain visualization, path/ancestor/depth statistics, and cross-links to walk the entire DAG.
-- **Run the verification.** Hit `▶ Run Checks` and watch the 23 theorems verify in topological order, each node flashing green as it passes. The terminal panel logs results in real time. This mirrors exactly what `python run_checks.py` does on your machine.
+Each theorem is a single function that constructs a mathematical witness and returns a structured result: the theorem's name, its logical dependencies, its epistemic status, and a summary of what was proved.  The entire codebase is a directed acyclic graph of such functions.  There is nothing else here.
 
-The visualization is served via GitHub Pages from the `docs/` directory. No build step, no dependencies — it's a single self-contained HTML file.
+## How to verify
 
-## Quick start
+Three paths, in order of increasing friction:
 
+**1. Colab notebook — zero install, full transparency.** [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Ethan-Brooke/APF-Paper-1-The-Enforceability-of-Distinction/blob/main/APF_Reviewer_Walkthrough.ipynb) Every key theorem is derived inline with exact rational arithmetic you can inspect and modify. Run all cells — the full verification takes under 10 seconds.
+
+**2. Browser — zero install.** Open the [Interactive Derivation DAG](https://ethan-brooke.github.io/APF-Paper-1-The-Enforceability-of-Distinction/). Explore the 23-theorem dependency graph. Hover any node for its mathematical statement, key result, shortest derivation chain to A1, and the number of distinct paths (structural redundancy). Click **Run Checks** to watch all 23 theorems verify in topological order.
+
+**3. Local — no pip install.**
 ```bash
 git clone https://github.com/Ethan-Brooke/APF-Paper-1-The-Enforceability-of-Distinction.git
 cd APF-Paper-1-The-Enforceability-of-Distinction
 python run_checks.py
 ```
-
-No dependencies. No `pip install`. Python 3.9+ and the standard library — that's it.
-
-You should see:
-
+Expected output:
 ```
-  APF Paper 1 — Structural Skeleton (SPINE)
-  ==================================================
-  23 theorems from A1 (finite enforcement capacity)
-
-  [AXIOM] PASS  A1
-         Finite enforcement capacity exists (C > 0, C < infinity)
-  [P] PASS  M
-         Multiple distinguishable subsystems exist
-  [P] PASS  NT
-         Subsystems are not all identical
-  [P] PASS  L_epsilon*
-         eps_Gamma > 0: meaningful distinctions have minimum enforcement cost
-  ...
-  [P] PASS  T_tensor
-         Tensor product forced by compositional closure
-
-  ============================================================
   Paper 1 (SPINE): 23 passed, 0 failed, 0 errors — 23 theorems
-  ============================================================
 ```
+
+**4. Individual inspection.**
+```python
+from apf.bank import get_check
+r = get_check('T_Born')()
+print(r['key_result'])
+# → "Born rule is unique admissibility-invariant probability (Gleason, d>=3)"
+```
+
+For reviewers, a [dedicated guide](REVIEWERS_GUIDE.md) walks through the logical architecture, the structural assumptions, and the anticipated objections.
+
+---
+
+## Theorem mapping table
+
+This table maps every result in the manuscript to its executable verification.  Column 4 describes the *mathematical content* of each check — what is constructed, what inequality is verified, what structure is exhibited.
+
+| Theorem | Manuscript | Code | What is mathematically verified |
+|---------|-----------|------|-------------------------------|
+| **A1** (Finite Enforcement Capacity) | §2 | `check_A1()` | Consistency: any finite C > 0 satisfies the axiom; max distinctions ⌊C/ε⌋ is finite for all test values |
+| **M** (Multiplicity) | §2.2 | `check_M()` | \|𝒟\| ≥ 2 is satisfiable; constructive witness with heterogeneous costs; countermodel shows \|𝒟\| = 1 produces no physics |
+| **NT** (Non-Degeneracy) | §2.2 | `check_NT()` | ε(d₁) ≠ ε(d₂) is satisfiable; identical costs collapse structure to trivial |
+| **L<sub>ε*</sub>** (Minimum Cost) | §4.1 | `check_L_epsilon_star()` | Contrapositive: if ε* = 0 then \|𝒟\| = ∞, contradicting C < ∞. Constructive: ε* > 0 as Fraction |
+| **L<sub>loc</sub>** (Locality) | §4.2 | `check_L_loc()` | Overflow witness: 6 distinctions with ε = 2 cost 19½ at a single interface (> C = 10), but distribute admissibly at 8¼ each (≤ 10). Locality is forced, not assumed |
+| **L<sub>nc</sub>** (Non-Closure) | §4.3 | `check_L_nc()` | Two individually admissible states whose composition exceeds C. State space ≠ simplex. Exact rational overflow |
+| **L<sub>Δ</sub>** (Competition) | §4.4 | `check_L_irr()` (witness) | Superadditivity: Δ > 0 strictly. Combined perturbation cost exceeds sum of individual costs |
+| **L<sub>irr</sub>** (Irreversibility) | §4.5 | `check_L_irr()` | Cross-interface correlations increase committed capacity; partial-trace witness shows local reversal is impossible |
+| **T0** (Axiom Witnesses) | §5 | `check_T0()` | Concrete non-commuting operators: σ_x, σ_z with Δ = 4; [A,B] ≠ 0 verified |
+| **T1** (Bridge Theorem) | §5.1 | `check_T1()` | Order-dependence: E_A ∘ E_B ≠ E_B ∘ E_A on the capacity functional; enforces OR0 (Faithfulness) |
+| **L<sub>T2</sub>** (Finite GNS) | §5.2 | `check_L_T2_finite_gns()` | Constructive GNS on M₂(ℂ): inner product ⟨a,b⟩ = ω(a†b) with ω = Tr(·)/2, representation π(x)b = xb, dim(H) = 4 |
+| **T2** (Hilbert Space) | §5.2 | `check_T2()` | Non-closure + T1 + OR1–OR3 + finite GNS ⟹ C*-algebra on Hilbert space; Wedderburn–Artin decomposition ⊕ M_nk(ℂ) |
+| **T<sub>Born</sub>** (Born Rule) | §5.3 | `check_T_Born()` | Gleason's theorem: frame function on H (dim ≥ 3) ⟹ unique probability p = \|⟨ψ\|φ⟩\|²; verified for d = 3 |
+| **T<sub>Hermitian</sub>** (Self-Adjoint Observables) | §5.4 | `check_T_Hermitian()` | Irreversibility + non-closure ⟹ O = O†; self-adjointness forced, not postulated |
+| **T<sub>CPTP</sub>** (CPTP Dynamics) | §5.5 | `check_T_CPTP()` | Admissibility preservation ⟹ completely positive trace-preserving maps; Kraus form Φ(ρ) = Σ K_i ρ K_i† verified |
+| **T<sub>⊗</sub>** (Tensor Products) | §5.6 | `check_T_tensor()` | Independent interfaces ⟹ H_AB = H_A ⊗ H_B; entanglement generic (S = 0.6931 for Bell-state witness) |
+| **T3** (Gauge Bundle) | §5.7 | `check_T3()` | Locality + operator algebra ⟹ interface automorphisms form compact group; principal bundle P → M with connection ∇ |
+| **T<sub>S</sub>** (Entropy) | §5.8 | `check_T_entropy()` | S(ρ) = −Tr(ρ ln ρ) equals committed enforcement capacity; verified against exact von Neumann entropy |
+| **T<sub>M</sub>** (Monogamy) | §5.9 | `check_T_M()` | Finite capacity + locality ⟹ disjoint interfaces enforce independently; seed of entanglement monogamy |
+| **T<sub>ε</sub>** (Min Cost Parameter) | §5.10 | `check_T_epsilon()` | ε = min cost > 0 as well-defined parameter of any admissible system |
+| **T<sub>κ</sub>** (Binary Multiplier) | §5.10 | `check_T_kappa()` | Binary distinction costs exactly 2ε: κ = 2. Derivation from ε + L_irr |
+| **T<sub>η</sub>** (Correlation Bound) | §5.10 | `check_T_eta()` | η/ε ≤ 1: correlations never cost more than the distinctions they correlate |
+| **T<sub>can</sub>** (Canonical Object) | §6 | `check_T_canonical()` | Sheaf of finite sets + non-local cost functional Ω_inter; separatedness + gluing axioms verified |
+| **L<sub>cost</sub>** (Cost Uniqueness) | §6 | `check_L_cost()` | C(G) = dim(G)·ε is the unique cost assignment compatible with A1 |
+
+All check functions reside in `apf/core.py`.  Every function listed above can be called independently and returns a structured result including its logical dependencies, epistemic status, and the mathematical content it verifies.
+
+---
 
 ## The derivation chain
-
-Paper 1 establishes the root and first two tiers of the APF derivation DAG:
 
 ```
                               A1
@@ -76,7 +102,7 @@ Paper 1 establishes the root and first two tiers of the APF derivation DAG:
                             │
                      ┌──────┴──────┐
                      M             NT
-                (multiplicity)  (non-triviality)
+                (multiplicity)  (non-degeneracy)
                      │              │
           ┌──────────┼──────────────┼──────────┐
          L_ε*       L_loc         L_nc        L_irr
@@ -90,145 +116,47 @@ Paper 1 establishes the root and first two tiers of the APF derivation DAG:
      (Hilbert)                          (canonical object)
 ```
 
-The critical path: **A1 → L_ε\* → L_loc → L_nc → T1 → T2 → T3**
+Critical path: **A1 → L<sub>ε*</sub> → L<sub>loc</sub> → L<sub>nc</sub> → T1 → T2 → T3**
 
-Every downstream theorem traces back to A1 through this chain. Many theorems have *multiple* paths to A1 — this is structural redundancy, not disorder. The interactive visualization shows exact path counts for every node.
+Many theorems have multiple derivation paths to A1.  This is structural redundancy — the results are over-determined and would survive even if individual derivation steps were weakened.  The [interactive DAG](https://ethan-brooke.github.io/APF-Paper-1-The-Enforceability-of-Distinction/) shows exact path counts for every node.
 
-## The 23 theorems
-
-| # | Theorem | Full Name | Key Result | Tier |
-|---|---------|-----------|------------|------|
-| 1 | **A1** | Finite Enforcement Capacity | C > 0, C < ∞ | Axiom |
-| 2 | **M** | Multiplicity | \|D\| ≥ 2 | Sub-clause |
-| 3 | **NT** | Non-Triviality | ε(d₁) ≠ ε(d₂) | Sub-clause |
-| 4 | **L_ε\*** | Minimum Cost | ε\* > 0 | Tier 0 |
-| 5 | **L_nc** | Non-Closure | State space ≠ simplex | Tier 0 |
-| 6 | **L_loc** | Locality | E(S₁∪S₂) = E(S₁) + E(S₂) | Tier 0 |
-| 7 | **L_irr** | Irreversibility | ∃ irreversible processes | Tier 0 |
-| 8 | **L_T2** | Finite GNS | dim(H) = 4 witness | Tier 1 |
-| 9 | **L_cost** | Cost Uniqueness | C(G) = dim(G)·ε forced | Tier 1 |
-| 10 | **T0** | Axiom Witnesses | Δ = 4, [A,B] ≠ 0 | Tier 1 |
-| 11 | **T1** | Incompatible Observables | ∃ incompatible A, B | Tier 1 |
-| 12 | **T2** | Hilbert Space | H = Hilbert space | Tier 1 |
-| 13 | **T3** | Gauge Bundle | P → M, ∇ connection | Tier 1 |
-| 14 | **T_Born** | Born Rule | p = \|⟨ψ\|φ⟩\|² | Tier 1 |
-| 15 | **T_CPTP** | CPTP Dynamics | Φ: CPTP maps | Tier 1 |
-| 16 | **T_Hermitian** | Hermitian Observables | O = O† | Tier 1 |
-| 17 | **T_M** | Interface Monogamy | Disjoint ⇒ independent | Tier 1 |
-| 18 | **T_canonical** | Canonical Object | Sheaf + Ω_inter | Tier 1 |
-| 19 | **T_entropy** | Entropy | S = −Tr(ρ ln ρ) | Tier 1 |
-| 20 | **T_ε** | Min Cost Parameter | ε = min cost > 0 | Tier 1 |
-| 21 | **T_κ** | Binary Multiplier | κ = 2 | Tier 1 |
-| 22 | **T_η** | Correlation Bound | η/ε ≤ 1 | Tier 1 |
-| 23 | **T_⊗** | Tensor Products | H_AB = H_A ⊗ H_B | Tier 1 |
-
-Every theorem tagged **[P]** is proved from A1. The only input is A1 itself (**[AXIOM]**).
+---
 
 ## Repository structure
 
 ```
-APF-Paper-1-The-Enforceability-of-Distinction/
-├── README.md             ← you are here
-├── LICENSE               ← MIT
-├── pyproject.toml        ← package metadata (zero dependencies)
-├── run_checks.py         ← convenience script
-├── .gitignore
+├── README.md                 ← you are here
+├── REVIEWERS_GUIDE.md        ← dedicated guide for peer reviewers
 ├── apf/
-│   ├── __init__.py       ← package marker + version
-│   ├── apf_utils.py      ← shared math utilities (stdlib only)
-│   ├── core.py           ← the 23 theorem check functions
-│   └── bank.py           ← registry + runner
-└── docs/
-    └── index.html        ← interactive derivation DAG (GitHub Pages)
+│   ├── core.py               ← the 23 theorem check functions
+│   ├── apf_utils.py          ← exact arithmetic utilities (Fraction-based)
+│   └── bank.py               ← registry and runner
+├── docs/
+│   └── index.html            ← interactive derivation DAG (GitHub Pages)
+├── run_checks.py             ← convenience entry point
+├── pyproject.toml            ← metadata (zero dependencies)
+├── .zenodo.json              ← archival metadata
+└── LICENSE                   ← MIT
 ```
 
-## Usage
+The mathematical content lives in `apf/core.py`.  Everything else is infrastructure.  A [reviewers' guide](REVIEWERS_GUIDE.md) provides a physics-first walkthrough of the logical architecture.
 
-### Command line
+---
 
-```bash
-# Run all 23 checks
-python run_checks.py
+## What this paper derives and what it does not
 
-# Run a single theorem
-python run_checks.py T2
+**Derived:** Hilbert spaces (T2), the Born rule (T<sub>Born</sub>), Hermitian observables (T<sub>Herm</sub>), CPTP dynamics (T<sub>CPTP</sub>), tensor products (T<sub>⊗</sub>), gauge symmetry skeleton (T3), von Neumann entropy (T<sub>S</sub>), and the canonical enforcement object (T<sub>can</sub>).  All from A1.
 
-# List all theorem names
-python run_checks.py --list
+**Not derived here:** Specific gauge groups (SU(3) × SU(2) × U(1)), particle content (61 types, 3 generations), mass hierarchies, mixing matrices, CP violation, spacetime dimension (d = 4), cosmological parameters, and the 47 zero-parameter quantitative predictions.  These are the subjects of Papers 2–7.
 
-# Show dependency chain for a theorem
-python run_checks.py --deps T3
-```
-
-### Python API
-
-```python
-from apf.bank import run_all, get_check
-
-# Run everything
-results = run_all()
-
-# Inspect a single theorem
-r = get_check('T_Born')()
-print(r['key_result'])
-# → "Born rule is unique admissibility-invariant probability (Gleason, d>=3)"
-print(r['dependencies'])
-# → ['T2', 'T_Hermitian', 'A1', 'L_Gleason_finite']
-```
-
-### GitHub Pages
-
-The interactive visualization is live at:
-
-**https://ethan-brooke.github.io/APF-Paper-1-The-Enforceability-of-Distinction/**
-
-Served from `docs/index.html`. No build step, no CI, no dependencies.
-
-## What this does and does not cover
-
-**Derived in Paper 1:** The structural skeleton of quantum mechanics — Hilbert spaces, Born rule, Hermitian observables, CPTP dynamics, tensor products, gauge symmetry skeleton, entropy, and the canonical enforcement object. All from A1.
-
-**Deferred to later papers:** Specific gauge groups (SU(3) × SU(2) × U(1)), particle content (61 types, 3 generations), mass hierarchies, mixing matrices, CP violation, spacetime dimension (d = 4), cosmological parameters, and the 47 zero-parameter quantitative predictions. The full APF codebase (312 theorems across 16+ modules) will be released as the paper series is published.
-
-## Epistemic tags
-
-Each theorem result includes an `epistemic` field:
-
-- **`AXIOM`** — The single input (A1 only)
-- **`P`** — Proved from A1 (all 22 non-axiom theorems in this release)
-
-Later papers introduce additional tags for conjectures (`C`), red-team adversarial tests (`RED_TEAM`), and results with external mathematical dependencies.
-
-## Design principles
-
-- **Zero external dependencies.** Python stdlib only. No NumPy, no SciPy, no frameworks. Every matrix operation is hand-implemented in `apf_utils.py` using exact arithmetic (`fractions.Fraction`) where possible.
-- **Code is the specification.** The paper is a guide to reading the code. If the paper and the code disagree, the code is authoritative.
-- **Machine-verifiable.** Every theorem is a function that returns pass/fail. No trust required — run it yourself.
-- **Multiple derivation paths.** Many theorems depend on A1 both directly and through intermediate lemmas. This structural redundancy means results are over-determined — they would survive even if individual derivation steps were weakened.
-
-## What comes next
-
-This is Paper 1 of a 7-paper series. Each subsequent paper adds modules to the codebase and extends the derivation DAG:
-
-| Paper | Title | Modules | New theorems |
-|-------|-------|---------|-------------|
-| **1** | **SPINE** (this repo) | `core.py` | **23** |
-| 2 | STRUCTURE | `core.py` (extended) | ~10 |
-| 3 | IRREVERSIBILITY | `supplements.py` | ~15 |
-| 4 | CONSTRAINTS | `gauge.py`, `generations.py` | ~70 |
-| 5 | QUANTUM | `majorana.py`, `supplements.py` | ~20 |
-| 6 | DYNAMICS & GEOMETRY | `spacetime.py`, `gravity.py`, `cosmology.py` | ~40 |
-| 7 | ACTION | `internalization.py`, `extensions.py` | ~30 |
-
-By Paper 7, the DAG grows from 23 theorems to 312, and the framework makes 47 zero-parameter quantitative predictions — all from the same single axiom.
+---
 
 ## Citation
 
-If you use this code in academic work, please cite Paper 1:
-
 ```bibtex
 @software{apf-paper1,
-  title   = {The Enforceability of Distinction: The Structural Skeleton of Quantum Mechanics from Finite Enforcement Capacity},
+  title   = {The Enforceability of Distinction: The Structural Skeleton of
+             Quantum Mechanics from Finite Enforcement Capacity},
   author  = {Ethan Brooke},
   year    = {2025},
   doi     = {10.5281/zenodo.18439200},
@@ -238,4 +166,4 @@ If you use this code in academic work, please cite Paper 1:
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+MIT.  See [LICENSE](LICENSE).
