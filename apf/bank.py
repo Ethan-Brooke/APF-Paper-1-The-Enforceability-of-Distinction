@@ -19,17 +19,26 @@ def _build_registry():
             # Function couldn't be extracted — skip with a warning attribute
             continue
         reg[name] = fn
-    # 3-check κ_int structural-rigidity addition (Paper 1 supplement v8.31 §9 + §14.5)
+    # 5-check κ_int structural-rigidity addition (Paper 1 supplement v8.32 §9 + §14.5 + §11)
+    # Now 5 checks: 3 original (lower bound + upper bound + two-sided rigidity) +
+    # 2 new (R1-R4 spine-derivable + MD-uniform-floor floor theorem without Weierstrass)
     try:
         from apf import kappa_int_bounds as _kappa_int
         _kappa_int.register(reg)
     except ImportError:
         pass  # module not available; skip
+    # 2-check foundation-input addition (Paper 1 supplement v8.32 §1)
+    # Canonical 4-input declaration + PLEC-derived-from-spine
+    try:
+        from apf import foundation_inputs as _foundation
+        _foundation.register(reg)
+    except ImportError:
+        pass
     return reg
 
 
 REGISTRY = _build_registry()
-EXPECTED_CHECK_COUNT = 21  # 18 core + 3 κ_int structural-rigidity
+EXPECTED_CHECK_COUNT = 25  # 18 core + 5 κ_int + 2 foundation-inputs
 
 
 def get_check(name):

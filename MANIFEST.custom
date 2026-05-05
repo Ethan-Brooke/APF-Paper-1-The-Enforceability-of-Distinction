@@ -36,3 +36,11 @@ docs/index.html                    # GitHub Pages landing with custom layout
 #
 # Add an entry here in the form `path:CUSTOM:section_id` to declare a
 # section as preserved.  No entry needed if the file is fully regenerable.
+# §0 60-second mental map + corpus table sections (sentinel-based partial preservation, LATER-23)
+README.md:CUSTOM:corpus_papers_9_10        # custom additions for Papers 9 + 10 placeholders
+START_HERE.md:CUSTOM:mental_map_v8.32      # 60-second mental map rewritten with foundation-alignment sequence
+START_HERE.md:CUSTOM:corpus_papers_9_10    # Papers 9 + 10 placeholders in §1 corpus table
+
+# Foundation-alignment modules added LATER-23 (codebase v7.9)
+apf/foundation_inputs.py                   # canonical 4-input declaration + PLEC-derived-from-spine witnesses
+apf/kappa_int_bounds.py                    # κ_int two-sided rigidity + R1-R4 spine-derivable + MD-uniform-floor witnesses

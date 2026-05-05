@@ -1,47 +1,48 @@
-# NEXT_STEPS — Push the refreshed Paper 1 repo to GitHub
+# NEXT_STEPS — Push the v8.32 + v7.9 refreshed Paper 1 repo to GitHub
 
-The repo at `Codebase/APF-Paper-1-The-Enforceability-of-Distinction/` has been refreshed end-to-end (2026-05-04 LATER):
+The repo at `Codebase/APF-Paper-1-The-Enforceability-of-Distinction/` has been refreshed end-to-end with the LATER foundation-alignment additions:
 
-- Paper 1 main v5.0 → **v5.2**
-- Paper 1 supplement v8.81 → **v8.31** (κ_int + R1-R4 closures)
-- Codebase v7.3 → **v7.8** (with `apf/kappa_int_bounds.py` bundled)
-- README, START_HERE, REVIEWERS_GUIDE, ai_context/* all template-regenerated
-- Colab notebook `APF_Reviewer_Walkthrough.ipynb` regenerated
-- `interactive_dag.html` regenerated
-- `MANIFEST.custom` seeded for custom-content preservation discipline
+- Paper 1 supplement v8.31 → **v8.32** (coderefs added to new bank checks)
+- Codebase v7.8 → **v7.9** (Phase 42: 4 new tier-4 [P_structural] checks)
+  - `apf/foundation_inputs.py` (NEW MODULE)
+    - `check_T_four_input_declaration` — canonical 4-input set (FD1+FD2+FD3+finite-physical-regime)
+    - `check_T_PLEC_derived_from_spine` — A1/MD/A2/BW derived consequences
+  - `apf/kappa_int_bounds.py` extended
+    - `check_T_R1_R4_spine_derivable`
+    - `check_T_minimum_distinction_floor_via_MD`
+- EXPECTED_THEOREM_COUNT 467 → **471**; verify_all 484 → **488**; modules 27 → **28**
+- Codebase folder renamed v7.8 → **v7.9**
+- README.md + START_HERE.md updated with v7.9 / 471/488 counts
+- START_HERE.md §0 60-second mental map **rewritten in proper foundation sequence**:
+  admissibility space → 3 primitives + finite-regime → PLEC derived → eternalist →
+  Sep/IJC → κ_int rigidity → R1-R4 spine-derived
+- Papers 9 (Geometric Substrate) + 10 (Calculus of Finite Continuability) added to
+  corpus tables with placeholders for upcoming repo creation
+- MANIFEST.custom extended with new sentinel ids + foundation-module entries
+- All edits wrapped in `<!-- CUSTOM:start id=... -->` sentinels for refresh preservation
 
-The push to GitHub requires your local credentials. Two paths:
+## Push command
 
-## Path A — Push from this Drive-synced directory directly
+The Drive-synced directory already has a `.git/` from the earlier push. To push the new commit:
 
-```bash
+```powershell
 cd "C:\Users\EthanBrooke\My Drive\__APF Library\Codebase\APF-Paper-1-The-Enforceability-of-Distinction"
-git init -b main
-git remote add origin https://github.com/Ethan-Brooke/APF-Paper-1-The-Enforceability-of-Distinction.git
 git add -A
-git commit -m "Refresh: Paper 1 sup v8.31 + κ_int + R1-R4 + codebase v7.8"
-git push -u origin main --force
+git commit -m "Refresh v8.31 → v8.32 + codebase v7.8 → v7.9 (Phase 42 foundation alignment)"
+git push --force
 ```
 
-## Path B — Pull from the pre-built zip on outputs/
+Or use the pre-built zip at `outputs/APF-Paper-1-refresh-v8.32-with-git_2026-05-05.zip` (unzip outside Drive, push from there).
 
-A zip with a clean working .git/ directory is at `outputs/APF-Paper-1-refresh-with-git_2026-05-05.zip`:
+## What changed for AI agents reading START_HERE.md
 
-1. Unzip somewhere outside Drive (to avoid Drive sync conflicts with .git/)
-2. cd into the unzipped `paper1_repo_git/` directory
-3. Verify: `git log --oneline | head -3` should show one commit
-4. Push: `git push -u origin main --force`
+The 60-second mental map (§0) now puts the foundation claims in the right order:
 
-The commit message documents what landed.
+1. **Admissibility space** (the structural referent) — Paper 0 v6.0 + Paper 1 sup v8.32
+2. **Three primitive commitments + one regime hypothesis** = 4 inputs (FD1, FD2, FD3, finite-physical-regime)
+3. **PLEC's four features as derived consequences** (not primitives) — A1/MD/A2/BW via Paper 10 §3.5 reductions
+4. **Eternalist commitment** — time is derived (Paper 3 + Paper 6); operational vocabulary is descriptive convention
+5. **What this paper contributes** — Sep/IJC + noncommutative continuation + κ_int rigidity + R1-R4 spine-derivation
+6. **Canonical state** — codebase v7.9, 471 bank-registered theorems, 488 verify_all checks, 28 modules
 
-## Path C — Patch your existing local clone
-
-If you have a local clone of the GitHub repo elsewhere on disk:
-
-1. cd to your local clone
-2. Mirror the Drive-synced state: `rsync -av --delete --exclude=.git "C:\path\to\Drive\Codebase\APF-Paper-1.../" .`
-3. `git add -A && git commit -m "..." && git push --force`
-
----
-
-After push, optionally mint a new Zenodo version on the existing concept DOI (10.5281/zenodo.18604678 for the main paper; 10.5281/zenodo.19714958 for the standalone supplement). The current zenodo.json carries the existing DOI as a `related_identifier`; minting a new version is a manual action via Zenodo's web UI after the GitHub push triggers the webhook.
+This sequence is the corpus-canonical framing as of LATER-9 + LATER-22 + LATER-23 (Phase 42).

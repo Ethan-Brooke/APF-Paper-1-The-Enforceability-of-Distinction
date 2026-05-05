@@ -16,24 +16,54 @@ This file is structured in three tiers. **Tier 1** (§0 below) is the 60-second 
 
 ## §0 — 60-second mental map (Tier 1)
 
-**What APF is.** APF is a structural-realist framework grounded in *admissibility space* — the FD1 enforcement-interface triple (S_Γ, 𝒟(Γ), C(Γ)) at every causally-connected region — structured by the four constitutive features of the Principle of Least Enforcement Cost (PLEC): A1 (capacity bound), MD (positive cost floor), A2 (argmin selection), BW (cost-spectrum non-degeneracy). These four are pairwise structurally independent; Paper 1 Supplement v2 is canonical bedrock for FD1 + PLEC + the K3 theorem. Papers 1–8 jointly **claim to derive** the Standard Model gauge group SU(3)×SU(2)×U(1), 45 fermions in three generations, and 48 quantitative predictions with zero free parameters; the symbolic proofs live in the citing papers. The codebase (v7.0; 424 bank-registered theorems / 441 verify_all checks / 36 modules; canonical Phase-18 baseline) is the **executable audit layer** for those claims — it records dependencies, runs consistency checks, and exposes numerical witnesses; it is not a substitute for paper-level proof. Numerical agreement at concrete values is a sanity check, not a proof. Paper 0 v4.4 §sec:codebase is the canonical status block.
+<!-- CUSTOM:start id=mental_map_v8.32 -->
 
-**What this paper contributes.** Argument-first technical paper of the Admissibility Physics Framework. From PLEC's four constitutive features (A1, MD, A2, BW) on FD1's enforcement-interface triple (S_Γ, 𝒟(Γ), C(Γ)), the body delivers two formal endpoints: the Sep/IJC classification of finite tested interfaces, and a noncommutative continuation structure on the (IJC) branch (the bridge L_Δ → T1 → T_adj → L_blk → T_alg). The standard ascent from this noncommutative continuation algebra to a complex Hilbert representation, the Born rule, and Tsirelson-type bounds is previewed and deferred to the quantum-structure paper. Companion: standalone formal-foundation supplement (v8.8, concept DOI 10.5281/zenodo.19714958) carrying the Sep/IJC Representation Theorem as a finite-Boolean-feasibility biconditional.
+**The structural referent.** APF is a structural-realist framework whose primary commitment is to *admissibility space* — the structural object physics is articulated on at every causally-connected interface (Paper 0 v6.0 + Paper 1 supplement v8.32). Admissibility space is not a substance; it is the pattern of finite admissible continuations together with the cost structure that distinguishes physical identity from non-identity.
 
-**What this repo verifies vs what it imports.** This repo locally verifies 18 theorem checks drawn from Paper 1's own dependency subset. Results from no other papers (this repo is the spine; all later papers import from it) are imported, not re-derived here. The full APF corpus (and which paper owns which result) is in §1 below.
+**Three primitive commitments + one regime hypothesis = 4 inputs total.** The framework's input set is exactly four (Paper 0 v6.0.5 + Paper 1 supplement v8.32 §1; LATER-9 input collapse 5 → 4):
+
+1. **FD1** — physical identity = finite admissible continuation identity.
+2. **FD2** — physical distinction = finite enforceable separator of continuation profiles.
+3. **FD3** — physical distinctions carry positive enforcement cost.
+4. **Finite-physical-regime hypothesis**: $C_\Gamma < \infty$ at every causally-connected region.
+
+These four are witnessed executable in `apf/foundation_inputs.py:check_T_four_input_declaration` (tier-4 [P_structural]). No fifth input is invoked anywhere in the corpus.
+
+**PLEC's four features (A1, MD, A2, BW) are derived consequences, not primitives.** Under Paper 10 v1.12 §3.5 reductions:
+- **A1** (capacity bound) = finite-physical-regime hypothesis half-1 directly.
+- **MD-value** ($\varepsilon^* > 0$) = finite-physical-regime hypothesis half-2; MD's tested/gauge cleavage = FD2's separator-vs-relabeling distinction.
+- **A2** (argmin selection) = derived from cost-as-infimum + no-waste under saturation.
+- **BW** (cost-spectrum non-degeneracy) = derived from MD via Lemma BW.
+
+Witnessed in `apf/foundation_inputs.py:check_T_PLEC_derived_from_spine`.
+
+**Eternalist commitment.** Time is derived in this corpus (Paper 3 derives the arrow of time as the loss of global admissible coordination; Paper 6 derives the metric and dimensionality of spacetime). Operational vocabulary throughout the corpus — "evolution," "enforcement," "maintenance," "perturbation" — is the local reading of static admissibility-space structure under temporal slicing. The framework sits in the company of block-universe / Wheeler–DeWitt / Page–Wootters readings. Paper 0 §1 + Paper 1 supplement v8.32 §1 carry the canonical convention.
+
+**What this paper contributes (§9 + §11 + §14.5 of v8.32).** The Paper 1 supplement delivers four formal endpoints from the 4-input spine:
+
+- **Sep/IJC classification** of finite tested interfaces (Paper 1 supplement §sep-ijc-representation): every quantum-capable interface is in branch (Sep) — a faithful commuting Boolean record defender exists — or branch (IJC) — no faithful commuting completion can be built.
+- **Noncommutative continuation structure** on the (IJC) branch (the bridge L_Δ → T1 → T_adj → L_blk → T_alg).
+- **κ_int two-sided structural rigidity** (§9 + §14.5): the interface-cost residue $\kappa_{\Gamma,\mathrm{int}}$ is bounded between explicit substrate-derived endpoints (lower from MD/BW unconditional; upper from kernel-norm conditional on C1–C5). Audit-flagged "free functional" complaint formally closed.
+- **R1–R4 spine-derivation** (§11): the four robust-finite-interface conditions are derivable consequences of the spine + operational interrogation, not added regularity hypotheses. The floor theorem proof uses MD's uniform floor directly (no compactness, no LSC, no Weierstrass infimum-attainment theorem imported); witnessed by `kappa_int_bounds.py:check_T_R1_R4_spine_derivable` + `check_T_minimum_distinction_floor_via_MD`.
+
+The standard ascent from the noncommutative continuation algebra to complex Hilbert representation, Born rule, and Tsirelson-type bounds is previewed and deferred to Paper 5.
+
+**What this repo verifies vs what it imports.** This repo locally verifies 23 theorem checks drawn from Paper 1's dependency subset (16 core spine + 5 κ_int structural rigidity + 2 foundation-input witnesses). Results from no other papers are imported, not re-derived here. The full APF corpus (and which paper owns which result) is in §1 below.
 
 **Scope — after reading only this repo:**
 
-- **You may:** summarize Paper 1's argument and results; explain the local 18-theorem subset; run all bundled checks to verify them; cite the paper by its DOI.
-- **You may not:** claim mastery of the full APF corpus on the basis of this repo alone; re-derive results that belong to other papers using only material here; present imported results as locally derived in this repo; treat the bundled check subset as the whole engine (the canonical bank is 440 theorems / 457 checks; this repo contains a subset).
+- **You may:** summarize Paper 1's argument and results; explain the local 23-theorem subset; run all bundled checks to verify them; cite the paper by its DOI.
+- **You may not:** claim mastery of the full APF corpus on the basis of this repo alone; re-derive results that belong to other papers using only material here; present imported results as locally derived in this repo; treat the bundled check subset as the whole engine (the canonical bank is 471 theorems / 488 checks; this repo contains a subset).
 
-**Canonical state (one source of truth).** Codebase **v7.8**, frozen 2026-05-04. Full engine: **457** verify_all checks, **440** bank-registered theorems, **48** quantitative predictions. This repo bundles 18 of those checks for Paper 1's dependency subset. If you see a different count anywhere, this line is canonical.
+**Canonical state (one source of truth).** Codebase **v7.9**, frozen 2026-05-04. Full engine: **488** verify_all checks, **471** bank-registered theorems, **28** modules + standalone subpackage, **48** quantitative predictions, **0** free parameters. This repo bundles 23 of those checks. If you see a different count anywhere, this line is canonical.
+
+<!-- CUSTOM:end id=mental_map_v8.32 -->
 
 ---
 
 ## §1 — The corpus at a glance (Tier 1)
 
-This repo is **one paper-companion** in a 9-paper series. Before you treat any claim as the whole framework, know what else exists.
+This repo is **one paper-companion** in an 11-paper core derivational series (Papers 0–10, plus Paper 13 as master reference). Papers 9 and 10 — the geometric substrate ontology capstone and the continuation-calculus language layer — were promoted into the core sequence at LATER-9 (2026-05-04). Before you treat any claim as the whole framework, know what else exists.
 
 | # | Title | Zenodo DOI | GitHub repo | Status |
 |---|---|---|---|---|
@@ -45,10 +75,14 @@ This repo is **one paper-companion** in a 9-paper series. Before you treat any c
 | 5 | Quantum Structure from Finite Enforceability | [10.5281/zenodo.18604861](https://doi.org/10.5281/zenodo.18604861) | [`APF-Paper-5-Quantum-Structure-Hilbert-Born`](https://github.com/Ethan-Brooke/APF-Paper-5-Quantum-Structure-Hilbert-Born) | public |
 | 6 | Dynamics and Geometry as Optimal Admissible Reallocation | [10.5281/zenodo.18604874](https://doi.org/10.5281/zenodo.18604874) | [`APF-Paper-6-Dynamics-Geometry-Spacetime-Gravity`](https://github.com/Ethan-Brooke/APF-Paper-6-Dynamics-Geometry-Spacetime-Gravity) | public |
 | 7 | Action, Internalization, and the Lagrangian | [10.5281/zenodo.18604875](https://doi.org/10.5281/zenodo.18604875) | [`APF-Paper-7-Action-Internalization-Lagrangian`](https://github.com/Ethan-Brooke/APF-Paper-7-Action-Internalization-Lagrangian) | public |
+<!-- CUSTOM:start id=corpus_papers_9_10 -->
+| 9 | Geometric Substrate as Cost Structure of Comparison Continuations | _(DOI minting on next Zenodo pass)_ | [`APF-Paper-9-Geometric-Substrate`](https://github.com/Ethan-Brooke/APF-Paper-9-Geometric-Substrate) | _(repo creation pending)_ |
+| 10 | The Calculus of Finite Continuability | _(DOI minting on next Zenodo pass)_ | [`APF-Paper-10-Calculus-of-Finite-Continuability`](https://github.com/Ethan-Brooke/APF-Paper-10-Calculus-of-Finite-Continuability) | _(repo creation pending)_ |
+<!-- CUSTOM:end id=corpus_papers_9_10 -->
 | 13 | The Minimal Admissibility Core | [10.5281/zenodo.18614663](https://doi.org/10.5281/zenodo.18614663) | [`APF-Paper-13-The-Minimal-Admissibility-Core`](https://github.com/Ethan-Brooke/APF-Paper-13-The-Minimal-Admissibility-Core) | public |
-| — | Canonical codebase (v7.8) | [10.5281/zenodo.18604548](https://doi.org/10.5281/zenodo.18604548) | [`APF-Codebase`](https://github.com/Ethan-Brooke/APF-Codebase) | pending |
+| — | Canonical codebase (v7.9) | [10.5281/zenodo.18604548](https://doi.org/10.5281/zenodo.18604548) | [`APF-Codebase`](https://github.com/Ethan-Brooke/APF-Codebase) | pending |
 
-You are reading the companion to **Paper 1** (this repo: https://github.com/Ethan-Brooke/APF-Paper-1-The-Enforceability-of-Distinction). The canonical computational engine lives at codebase **v7.8** ([Zenodo](https://doi.org/10.5281/zenodo.18604548)). Each paper has its own companion repo following the same layout.
+You are reading the companion to **Paper 1** (this repo: https://github.com/Ethan-Brooke/APF-Paper-1-The-Enforceability-of-Distinction). The canonical computational engine lives at codebase **v7.9** ([Zenodo](https://doi.org/10.5281/zenodo.18604548)). Each paper has its own companion repo following the same layout.
 
 **When in doubt about scope:** if the question is about a result outside Paper 1, point the user (or yourself) to the relevant paper above. Do not try to derive it from the bundled subset; the canonical state is the codebase, not this slice.
 
