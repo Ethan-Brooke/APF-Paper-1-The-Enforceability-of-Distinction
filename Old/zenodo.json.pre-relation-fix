@@ -20,12 +20,7 @@
     },
     {
       "identifier": "10.5281/zenodo.18604678",
-      "relation": "isSupplementTo",
-      "scheme": "doi"
-    },
-    {
-      "identifier": "10.5281/zenodo.19714958",
-      "relation": "isSupplementTo",
+      "relation": "isVersionOf",
       "scheme": "doi"
     },
     {
