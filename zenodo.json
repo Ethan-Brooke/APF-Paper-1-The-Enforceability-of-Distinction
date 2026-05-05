@@ -1,6 +1,6 @@
 {
   "title": "APF Paper 1 — The Enforceability of Distinction: Quantum Structure from Finite Enforcement Capacity",
-  "description": "<p>Argument-first technical paper of the Admissibility Physics Framework. From PLEC's four constitutive features (A1, MD, A2, BW) on FD1's enforcement-interface triple (S_Γ, 𝒟(Γ), C(Γ)), the body delivers two formal endpoints: the Sep/IJC classification of finite tested interfaces, and a noncommutative continuation structure on the (IJC) branch (the bridge L_Δ → T1 → T_adj → L_blk → T_alg). The standard ascent from this noncommutative continuation algebra to a complex Hilbert representation, the Born rule, and Tsirelson-type bounds is previewed and deferred to the quantum-structure paper. Companion: standalone formal-foundation supplement (v8.8, concept DOI 10.5281/zenodo.19714958) carrying the Sep/IJC Representation Theorem as a finite-Boolean-feasibility biconditional.</p><p>This repository is the executable mathematical appendix for Paper 1 of the Admissibility Physics Framework (APF). All theorems trace to named check functions in the bundled <code>apf/</code> package.</p>",
+  "description": "<p>Argument-first technical paper of the Admissibility Physics Framework. From PLEC's four constitutive features (A1, MD, A2, BW) on FD1's enforcement-interface triple (S_Γ, 𝒟(Γ), C(Γ)), the body delivers two formal endpoints: the Sep/IJC classification of finite tested interfaces, and a noncommutative continuation structure on the (IJC) branch (the bridge L_Δ → T1 → T_adj → L_blk → T_alg). The standard ascent from this noncommutative continuation algebra to a complex Hilbert representation, the Born rule, and Tsirelson-type bounds is previewed and deferred to the quantum-structure paper. Companion: standalone formal-foundation supplement (v8.8, concept DOI 10.5281/zenodo.19714957) carrying the Sep/IJC Representation Theorem as a finite-Boolean-feasibility biconditional.</p><p>This repository is the executable mathematical appendix for Paper 1 of the Admissibility Physics Framework (APF). All theorems trace to named check functions in the bundled <code>apf/</code> package.</p>",
   "creators": [
     {
       "name": "Brooke, Ethan",
@@ -19,17 +19,17 @@
       "scheme": "url"
     },
     {
-      "identifier": "10.5281/zenodo.18604678",
+      "identifier": "10.5281/zenodo.18439200",
       "relation": "isSupplementTo",
       "scheme": "doi"
     },
     {
-      "identifier": "10.5281/zenodo.19714958",
+      "identifier": "10.5281/zenodo.19714957",
       "relation": "isSupplementTo",
       "scheme": "doi"
     },
     {
-      "identifier": "10.5281/zenodo.18604548",
+      "identifier": "10.5281/zenodo.18529115",
       "relation": "references",
       "scheme": "doi"
     }

@@ -7,7 +7,7 @@ contains the 18-check subset
 for this paper.
 
 Each function is copied verbatim from its original source module.
-See https://doi.org/10.5281/zenodo.18604548 for the full codebase.
+See https://doi.org/10.5281/zenodo.18529115 for the full codebase.
 """
 
 from fractions import Fraction
